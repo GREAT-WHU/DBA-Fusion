@@ -57,7 +57,7 @@ make python-install
 ## Run DBA-Fusion
 We don't modify the model of DROID-SLAM so you can directly employ the  weight trained for DROID-SLAM. Here we use the [model](https://drive.google.com/file/d/1PpqVt1H4maBa_GbPJp4NwxRsd9jk-elh/view?usp=sharing) pre-trained on TartanAir (provided by [DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM?tab=readme-ov-file)), which shows great zero-shot performance on real-world datasets.
 
-# 1. TUM-VI
+### 1. TUM-VI
 1.1 Download the [TUM-VI](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset) datasets (512*512).
 
 **(Optional)**
@@ -93,7 +93,7 @@ For 3D visualization, currently we haven't handled the realtime visualization fu
 python visualization/visualize_tumvi.py
 ```
 
-# 2. KITTI-360
+### 2. KITTI-360
 2.1 Download the [KITTI-360](https://www.cvlibs.net/datasets/kitti-360/index.php) datasets. Notice that we use the **unrectified perspective images** for the evaluation (named like "2013_05_28_drive_XXXX_sync/image_00/data_rgb").
 
 
@@ -122,7 +122,7 @@ python evaluation_scripts/evaluate_kitti360.py --seq ${SEQ}
 python visualization/visualize_tumvi.py
 ```
 
-# 3. Run on Your Own Dataset
+### 3. Run on Your Own Dataset
 To run monocular VIO on your own dataset,
 * Duplicate a script from [demo_vio_kitti360.py](../demo_vio_kitti360.py) or [demo_vio_tumvi.py](../demo_vio_tumvi.py). 
 * In the script, specify the data loading procedure of IMU data and images.
