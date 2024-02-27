@@ -60,7 +60,7 @@ make python-install
 Finally, run the following command to build DBA-Fusion.
 
 ```Bash
-git clone --recurse-submodules XXXX
+git clone --recurse-submodules https://github.com/GREAT-WHU/DBA-Fusion.git
 cd DBA-Fusion
 python setup.py install
 ```
