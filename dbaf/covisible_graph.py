@@ -13,11 +13,11 @@ import matplotlib.cm as cm
 import matplotlib
 
 class CovisibleGraph:
-    def __init__(self, video: DepthVideo, update_op, device="cuda:0", corr_impl="volume", max_factors=-1, args = None):
+    def __init__(self, video: DepthVideo, update_op, device="cuda:0", corr_impl="volume", args = None):
         self.video = video
         self.update_op = update_op
         self.device = device
-        self.max_factors = max_factors
+        self.max_factors = args.max_factors
         self.corr_impl = corr_impl
         self.upsample = args.upsample
 
@@ -53,7 +53,7 @@ class CovisibleGraph:
         self.skip_edge = args.skip_edge
         self.frontend_window = args.frontend_window
         
-        # simple visualization
+        # simple online visualization
         self.show_covisible_graph = False
         self.show_oldest_disparity = False
         self.show_flow_and_weight = False

@@ -8,7 +8,7 @@ class MultiSensorState:
     def __init__(self):
         self.cur_t = 0.0
 
-        ### IMU-centered states
+        """ IMU-centered states """
         self.timestamps = []            # timestamps (len == N)
 
         self.wTbs = []                  # poses      (len == N)

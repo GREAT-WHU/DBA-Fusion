@@ -91,8 +91,7 @@ def ape(traj_ref: PosePath3D, traj_est: PosePath3D,
 
 if __name__ == '__main__':
     color_list = [[0,0,1],[1,0.6,1],[1,0,0]]
-    plt.figure('1',figsize=[8,3.9])
-    plt.subplot(1,2,1)
+    plt.figure('1',figsize=[6,6])
     parser = argparse.ArgumentParser()
     parser.add_argument('--seq', type=str, help='seq',default='0010')
     args = parser.parse_args()
@@ -111,7 +110,7 @@ if __name__ == '__main__':
     args.plot_colormap_max_percentile = None
     args.ros_map_yaml = None
     args.plot = True
-    args.est_files = ['/mnt/z/share/kitti-360-scripts/droid_results/vins_temp_%sw.txt' %seq]
+    args.est_files = ['results/result_%s.txt' %seq]
     label_list = ['DBA-Fusion (M)']
     args.save_plot = False
     args.serialize_plot = False

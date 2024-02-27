@@ -12,7 +12,7 @@
 
 ## What is this? 
 
-**DBA-Fusion** is basically a VIO system which fuses DROID-SLAM-like dense bundle adjustment (DBA) with classic factor graph optimization. This work enables **online metric-scale localization and dense mapping** with excellent accuracy and robustness. Besides, this framework supports the **flexible fusion of multiple sensors** like GNSS or wheel speed sensors, extending its applicability to large-scale scenarios.  
+**DBA-Fusion** is basically a VIO system which fuses DROID-SLAM-like dense bundle adjustment (DBA) with classic factor graph optimization. This work enables **realtime metric-scale localization and dense mapping** with excellent accuracy and robustness. Besides, this framework supports the **flexible fusion of multiple sensors** like GNSS or wheel speed sensors, extending its applicability to large-scale scenarios.  
 <br />
 <div align=center>
 <img alt="" src="./assets/Hv.svg" width='400px' />
@@ -26,8 +26,8 @@
 </div>
 
 ## Update log
-- [x] Code Upload (2024.2.28)
-- [x] Monocular VIO Examples (2024.2.28)
+- [x] Code Upload (2024/02/28)
+- [x] Monocular VIO Examples (2024/02/28)
 - [ ] Multi-Sensor Fusion Examples
 - [ ] Stereo/RGB-D VIO Support
 
@@ -37,9 +37,13 @@ The pipeline of the work is based on python, and the computation part is mainly 
 Use the following command to set up the python environment.
 
 ```Bash
-conda env create -f environment.yaml
+conda create -n dbaf python=3.10.11
+conda activate dbaf
+pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
+pip install torch-scatter=2.0.9 -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
+pip install gdown tqdm numpy==1.25.0 numpy-quaternion==2022.4.3 opencv-python==4.7.0.72 scipy pyparsing matplotlib h5py 
 pip install evo --upgrade --no-binary evo
-pip install gdown
+pip install open3d # optional for visualization
 ```
 
 As for GTSAM, we make some modifications to it to extend the python wrapper APIs, clone it from the following repository and install it under your python environment.
@@ -53,9 +57,19 @@ cmake .. -DGTSAM_BUILD_PYTHON=1 -DGTSAM_PYTHON_VERSION=3.10.11
 make python-install
 ```
 
+Finally, run the following command to build DBA-Fusion.
+
+```Bash
+git clone --recurse-submodules XXXX
+cd DBA-Fusion
+python setup.py install
+```
 
 ## Run DBA-Fusion
 We don't modify the model of DROID-SLAM so you can directly employ the  weight trained for DROID-SLAM. Here we use the [model](https://drive.google.com/file/d/1PpqVt1H4maBa_GbPJp4NwxRsd9jk-elh/view?usp=sharing) pre-trained on TartanAir (provided by [DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM?tab=readme-ov-file)), which shows great zero-shot performance on real-world datasets.
+
+**(Attention!!!)**
+For the default configurations, around ~10GB GPU memory is needed. Lower the "max_factors" argument to 36 or lower could help reduce the memory usage to ~6GB.
 
 ### 1. TUM-VI
 1.1 Download the [TUM-VI](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset) datasets (512*512).
@@ -63,7 +77,7 @@ We don't modify the model of DROID-SLAM so you can directly employ the  weight t
 **(Optional)**
 For better speed performance, it is recommended to convert the PNG images to a single HDF5 file through
 ```Bash
-python dataset/prepare_tumvi.py --imagedir=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data --imagestamp=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data.csv --h5path=${SEQ}.h5 --calib=calib/tumvi.txt --stride 4
+python dataset/tumvi_to_hdf5.py --imagedir=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data --imagestamp=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data.csv --h5path=${SEQ}.h5 --calib=calib/tumvi.txt --stride 4
 ```
 
 1.2  Specify the data path in [batch_tumvi.py](../batch_tumvi.py) (if you use HDF5 file, activate the "--enable_h5" and "--h5_path" arguments), run the following command 
@@ -90,7 +104,7 @@ python evaluation_scripts/batch_evaluate_tumvi.py
 For 3D visualization, currently we haven't handled the realtime visualization functionality. Run the scripts in the **"visualization"** folder for post-time visualization. 
 
 ```Bash
-python visualization/visualize_tumvi.py
+python visualization/check_reconstruction_tumvi.py
 ```
 
 ### 2. KITTI-360
@@ -106,7 +120,7 @@ For **IMU** data and IMU-centered **ground-truth poses**, we transform the axise
 Similar to the TUM-VI part, you can use the following script to generate a HDF5 file for best speed performance.
 
 ```Bash
-python dataset/prepare_tumvi.py --imagedir=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data --imagestamp=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data.csv --h5path=${SEQ}.h5 --calib=calib/tumvi.txt --stride 4
+python dataset/kitti360_to_hdf5.py --imagedir=${DATASET_DIR}/2013_05_28_drive_%s_sync/image_00/data_rgb --imagestamp=${DATASET_DIR}/2013_05_28_drive_%s_sync/camstamp.txt --h5path=${SEQ}.h5 --calib=calib/kitti360.txt --stride 2
 ```
 
 2.2 Run the following command
@@ -119,7 +133,7 @@ Dataloading and parameters are specified in [demo_vio_kitti360.py](../demo_vio_k
 2.3 For evaluation and visualization, run
 ```Bash
 python evaluation_scripts/evaluate_kitti360.py --seq ${SEQ}
-python visualization/visualize_tumvi.py
+python visualization/check_reconstruction_kitti360.py
 ```
 
 ### 3. Run on Your Own Dataset

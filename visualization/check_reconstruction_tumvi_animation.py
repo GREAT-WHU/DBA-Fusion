@@ -8,7 +8,6 @@ import copy
 import pickle
 import re
 import math
-import geoFunc.trans as trans
 
 CAM_POINTS = np.array([
         [ 0,   0,   0],
@@ -51,7 +50,7 @@ def str2array(ss):
     return np.array(num)
 
 
-f = open(r'./reconstructions/outdoors6.pkl','rb')
+f = open(r'./results/outdoors6.pkl','rb')
 dump_data= pickle.load(f)
 print(dump_data.keys())
 
@@ -122,7 +121,7 @@ for ix in sorted(dump_data['points'].keys()):
     ctr.convert_from_pinhole_camera_parameters(camera_params)
     vis.poll_events()
     vis.update_renderer()
-    vis.capture_screen_image("tum_gif/%010d.jpg"%ix)
+    # vis.capture_screen_image("tum_gif/%010d.jpg"%ix)
 
 
 vis.destroy_window()

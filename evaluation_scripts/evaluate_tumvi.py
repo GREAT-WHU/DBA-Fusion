@@ -109,8 +109,7 @@ def ape(traj_ref: PosePath3D, traj_est: PosePath3D,
 
 if __name__ == '__main__':
     color_list = [np.array([133,164,195])/255.0,[1,0.6,1],[1,0,0]]
-    plt.figure(2,figsize=[104/25.4,49/25.4])
-    plt.subplot(1,2,1)
+    plt.figure('1',figsize=[6,6])
     parser = argparse.ArgumentParser()
     parser.add_argument('--seq', type=str, help='seq', default='outdoors1')
     parser.add_argument('--batch', action="store_true")
@@ -142,7 +141,7 @@ if __name__ == '__main__':
     args.plot_colormap_max_percentile = None
     args.ros_map_yaml = None
     args.plot = True
-    args.est_files = ['/home/zhouyuxuan/DBA-Fusion-release/vins_temp_%s_oppoww.txt' % seq]
+    args.est_files = ['results/result_%s.txt' % seq]
     label_list = ['DBA-Fusion (M)']
     args.save_plot = False
     args.serialize_plot = False

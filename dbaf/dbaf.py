@@ -93,7 +93,7 @@ class DBAFusion:
                 mpoints[ix] = {'pts':pts,'clr':clr}
                 mstamps[ix] = stamp
         ddict = {'points':mpoints,'cameras':mcameras,'stamps':mstamps}
-        f_save = open('reconstructions/%s.pkl' % self.pklpath, 'wb')
+        f_save = open(self.pklpath, 'wb')
         pickle.dump(ddict,f_save) 
 
         mcameras = {}
@@ -127,5 +127,5 @@ class DBAFusion:
                 mpoints[ix] = {'pts':pts,'clr':clr}
                 mstamps[ix] = stamp
         ddict = {'points':mpoints,'cameras':mcameras,'stamps':mstamps}
-        f_save = open('reconstructions/%s_loose.pkl' % self.pklpath, 'wb')
+        f_save = open(self.pklpath.split('.')[0] + '_raw.pkl', 'wb')
         pickle.dump(ddict,f_save) 

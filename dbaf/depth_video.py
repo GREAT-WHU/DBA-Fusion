@@ -70,10 +70,10 @@ class DepthVideo:
         
         ### DBAFusion
         # for .pkl saving
-        self.disps_save = torch.ones(20000, ht//8, wd//8, device="cuda", dtype=torch.float)
-        self.poses_save = torch.ones(20000, 7, device="cuda", dtype=torch.float)
-        self.tstamp_save = torch.zeros(20000, device="cuda", dtype=torch.float64)
-        self.images_save = torch.zeros(20000, ht//8, wd//8, 3, device="cuda", dtype=torch.float)
+        self.disps_save = torch.ones(5000, ht//8, wd//8, device="cuda", dtype=torch.float)
+        self.poses_save = torch.ones(5000, 7, device="cuda", dtype=torch.float)
+        self.tstamp_save = torch.zeros(5000, device="cuda", dtype=torch.float64)
+        self.images_save = torch.zeros(5000, ht//8, wd//8, 3, device="cuda", dtype=torch.float)
         self.count_save = 0
         self.save_pkl = save_pkl
 
@@ -114,7 +114,7 @@ class DepthVideo:
         self.logger = logging.getLogger('dba_fusion')
         self.logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler('dba_fusion.log')
-        formatter = logging.Formatter('%(msecs)d - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         fh.setFormatter(formatter)
         # add the handlers to the logger
         self.logger.addHandler(fh)
@@ -384,7 +384,8 @@ class DepthVideo:
                             H = torch.zeros([(marg_t1-marg_t0)*6,(marg_t1-marg_t0)*6],dtype=torch.float64,device='cpu')
                             v = torch.zeros([(marg_t1-marg_t0)*6],dtype=torch.float64,device='cpu')
                             bacore.hessian(H,v)
-                            for i in range(6): H[i,i] += 0.00025
+                            
+                            for i in range(6): H[i,i] += 0.00025  # for stability
 
                             Hg,vg = BA2GTSAM(H,v,self.Tbc)
                             vis_factor = CustomHessianFactor(marg_result,Hg,vg)
@@ -505,7 +506,7 @@ class DepthVideo:
                         odo_factor = gtsam.VelFactor(X(i),V(i),vb,gtsam.noiseModel.Diagonal.Sigmas(np.array([2.0,2.0,2.0])))
                         self.cur_graph.push_back(odo_factor)
 
-                # optimization iterations
+                """ multi-sensor DBA iterations """
                 for iter in range(2):
                     if iter > 0:
                         self.cur_graph.resize(self.cur_graph.size()-1)

@@ -89,6 +89,7 @@ if __name__ == '__main__':
     parser.add_argument("--buffer", type=int, default=80)
     parser.add_argument("--image_size", default=[240, 320])
 
+    parser.add_argument("--max_factors", type=int, default=48, help="maximum active edges (which determines the GPU memory usage)")
     parser.add_argument("--beta", type=float, default=0.3, help="weight for translation / rotation components of flow")
     parser.add_argument("--filter_thresh", type=float, default=2.4, help="how much motion before considering new keyframe")
     parser.add_argument("--warmup", type=int, default=8, help="number of warmup frames")

@@ -49,7 +49,7 @@ def str2array(ss):
     return np.array(num)
 
 
-f = open(r'./reconstructions/0002.pkl','rb')
+f = open(r'./results/0002.pkl','rb')
 dump_data= pickle.load(f)
 print(dump_data.keys())
 
@@ -78,8 +78,8 @@ vis.register_key_action_callback(32, key_action_callback)  # space
 vis.register_key_action_callback(264, save_callback)  # down
 
 for ix in sorted(dump_data['points'].keys()):
-    if ix < 500 : continue
-    if ix > 600 : continue
+    if ix < 550 : continue
+    if ix > 750 : continue
     dd=dump_data['points'][ix]
     pts = dd['pts']
     clr = dd['clr']
