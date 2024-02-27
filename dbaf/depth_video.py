@@ -347,6 +347,7 @@ class DepthVideo:
                         t0 = self.last_t0
                     else:
                         marg_paras = []
+                        # Construct a temporary factor graph (related to the old states) to obtain the marginalization information
                         graph = gtsam.NonlinearFactorGraph()
                         marg_idx = torch.logical_and(torch.greater_equal(self.cur_ii,self.last_t0),\
                                                     torch.less(self.cur_ii,t0))
