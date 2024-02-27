@@ -8,7 +8,7 @@
 </div>
 
 
-[Paper]
+[Paper] [Video] (coming soon...☕)
 
 ## What is this? 
 
@@ -34,7 +34,7 @@
 ## Installation
 The pipeline of the work is based on python, and the computation part is mainly based on Pytorch (with CUDA) and GTSAM.
 
-Use the following command to set up the python environment.
+Use the following commands to set up the python environment.
 
 ```Bash
 conda create -n dbaf python=3.10.11
