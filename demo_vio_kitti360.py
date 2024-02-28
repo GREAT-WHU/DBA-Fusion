@@ -122,26 +122,29 @@ if __name__ == '__main__':
 
     """ Load reference trajectory (for visualization) """
     all_gt ={}
-    fp = open(args.gtpath,'rt')
-    while True:
-        line = fp.readline().strip()
-        if line == '':break
-        if line[0] == '#' : continue
-        line = re.sub('\s\s+',' ',line)
-        elem = line.split(' ')
-        sod = float(elem[0])
-        if sod not in all_gt.keys():
-            all_gt[sod] ={}
-        R = quaternion.as_rotation_matrix(quaternion.from_float_array([float(elem[7]),\
-                                                                       float(elem[4]),\
-                                                                       float(elem[5]),\
-                                                                       float(elem[6])]))
-        TTT = np.eye(4,4)
-        TTT[0:3,0:3] = R
-        TTT[0:3,3] = np.array([ float(elem[1]), float(elem[2]), float(elem[3])])
-        all_gt[sod]['T'] = TTT
-    all_gt_keys =sorted(all_gt.keys())
-    fp.close()
+    try:
+        fp = open(args.gtpath,'rt')
+        while True:
+            line = fp.readline().strip()
+            if line == '':break
+            if line[0] == '#' : continue
+            line = re.sub('\s\s+',' ',line)
+            elem = line.split(' ')
+            sod = float(elem[0])
+            if sod not in all_gt.keys():
+                all_gt[sod] ={}
+            R = quaternion.as_rotation_matrix(quaternion.from_float_array([float(elem[7]),\
+                                                                           float(elem[4]),\
+                                                                           float(elem[5]),\
+                                                                           float(elem[6])]))
+            TTT = np.eye(4,4)
+            TTT[0:3,0:3] = R
+            TTT[0:3,3] = np.array([ float(elem[1]), float(elem[2]), float(elem[3])])
+            all_gt[sod]['T'] = TTT
+        all_gt_keys =sorted(all_gt.keys())
+        fp.close()
+    except:
+        pass
 
     """ Load IMU data """
     all_imu = np.loadtxt(args.imupath)

@@ -68,6 +68,7 @@ class DBAFusionFrontend:
         self.plt_att     = [[],[],[]] # pitch, roll, yaw
         self.plt_bg      = [[],[],[]] # X, Y, Z
         self.plt_t       = []
+        self.refTw       = np.eye(4,4)
 
         if self.show_plot:
             plt.figure('monitor',figsize=[13,4])
@@ -114,6 +115,8 @@ class DBAFusionFrontend:
 
         self.video.last_t0 -= roll
         self.video.last_t1 -= roll
+        self.video.cur_ii  -= roll
+        self.video.cur_jj  -= roll
         if self.video.imu_enabled:
             graph_temp = gtsam.NonlinearFactorGraph()
             for i in range(self.video.cur_graph.size()):
@@ -256,12 +259,24 @@ class DBAFusionFrontend:
         poses = SE3(self.video.poses)
         d = self.video.distance([self.t1-3], [self.t1-2], beta=self.beta, bidirectional=True)
         TTT = np.matmul(poses[self.t1-1].cpu().inv().matrix(),np.linalg.inv(self.video.Ti1c))
-        ppp = TTT[0:3,3]
+        if self.video.imu_enabled or (self.visual_only and self.visual_only_init):
+            ppp = TTT[0:3,3]
+            qqq = Rotation.from_matrix(TTT[:3, :3]).as_quat()
+            line = '%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f'%(cur_t,ppp[0],ppp[1],ppp[2]\
+                                        ,qqq[0],qqq[1],qqq[2],qqq[3])
+            if self.video.gnss_init_t1>0:
+                p = self.video.ten0 + np.matmul(trans.Cen(self.video.ten0), ppp.numpy())
+                line += ' %.6f %.6f %.6f'% (p[0],p[1],p[2]) 
+            self.result_file.writelines(line+'\n')
+            self.result_file.flush()
+
+        TTTref = np.matmul(self.refTw,TTT)
+        ppp = TTTref[0:3,3]
         if self.show_plot:
             # if math.fabs(tt_found - cur_t) < 0.1: # for kitti and whu
             self.plt_pos[0].append(ppp[0])
             self.plt_pos[1].append(ppp[1])
-            a1 = np.array(trans.m2att(TTT[0:3,0:3])     )* 57.3
+            a1 = np.array(trans.m2att(TTTref[0:3,0:3])     )* 57.3
             if self.all_gt is not None:
                 tt_found,dd = self.get_pose_ref(cur_t -1e-3)
                 self.plt_pos_ref[0].append(dd['T'][0,3])
@@ -295,15 +310,6 @@ class DBAFusionFrontend:
                 plt.plot(self.plt_t,self.plt_bg[2],c='b')
                 plt.pause(0.1)
 
-        if self.video.imu_enabled or (self.visual_only and self.visual_only_init):
-            qqq = Rotation.from_matrix(TTT[:3, :3]).as_quat()
-            line = '%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f'%(cur_t,ppp[0],ppp[1],ppp[2]\
-                                        ,qqq[0],qqq[1],qqq[2],qqq[3])
-            if self.video.gnss_init_t1>0:
-                p = self.video.ten0 + np.matmul(trans.Cen(self.video.ten0), ppp.numpy())
-                line += ' %.6f %.6f %.6f'% (p[0],p[1],p[2]) 
-            self.result_file.writelines(line+'\n')
-            self.result_file.flush()
 
         ## keyframe update
         self.video.logger.info('keyframes %d' % self.graph.ii.shape[0])
@@ -483,15 +489,18 @@ class DBAFusionFrontend:
                 TTT = self.video.state.wTbs[i].matrix()
                 ppp = TTT[0:3,3]
                 qqq = Rotation.from_matrix(TTT[:3, :3]).as_quat()
-
+                self.result_file.writelines('%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f\n'%(self.video.tstamp[i],ppp[0],ppp[1],ppp[2]\
+                                            ,qqq[0],qqq[1],qqq[2],qqq[3]))
+                
+                TTTref = np.matmul(self.refTw,TTT) # for visualization
+                ppp = TTTref[0:3,3]
+                qqq = Rotation.from_matrix(TTTref[:3, :3]).as_quat()
                 self.plt_pos[0].append(ppp[0])
                 self.plt_pos[1].append(ppp[1])
                 if self.all_gt is not None:
                     tt_found,dd = self.get_pose_ref(self.video.tstamp[i]-1e-3)
                     self.plt_pos_ref[0].append(dd['T'][0,3])
                     self.plt_pos_ref[1].append(dd['T'][1,3])
-                self.result_file.writelines('%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f\n'%(self.video.tstamp[i],ppp[0],ppp[1],ppp[2]\
-                                            ,qqq[0],qqq[1],qqq[2],qqq[3]))
             if self.show_plot:
                 plt.subplot(1,3,1)
                 plt.cla(); plt.gca().set_title('Trajectory')
@@ -556,15 +565,18 @@ class DBAFusionFrontend:
                 TTT = self.video.state.wTbs[i].matrix()
                 ppp = TTT[0:3,3]
                 qqq = Rotation.from_matrix(TTT[:3, :3]).as_quat()
-
+                self.result_file.writelines('%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f\n'%(self.video.tstamp[i],ppp[0],ppp[1],ppp[2]\
+                                            ,qqq[0],qqq[1],qqq[2],qqq[3]))
+                
+                TTTref = np.matmul(self.refTw,TTT) # for visualization
+                ppp = TTTref[0:3,3]
+                qqq = Rotation.from_matrix(TTTref[:3, :3]).as_quat()
                 self.plt_pos[0].append(ppp[0])
                 self.plt_pos[1].append(ppp[1])
                 if self.all_gt is not None:
                     tt_found,dd = self.get_pose_ref(self.video.tstamp[i]-1e-3)
                     self.plt_pos_ref[0].append(dd['T'][0,3])
                     self.plt_pos_ref[1].append(dd['T'][1,3])
-                self.result_file.writelines('%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f\n'%(self.video.tstamp[i],ppp[0],ppp[1],ppp[2]\
-                                            ,qqq[0],qqq[1],qqq[2],qqq[3]))
             if self.show_plot:
                 plt.subplot(1,3,1)
                 plt.cla(); plt.gca().set_title('Trajectory')
@@ -757,15 +769,13 @@ class DBAFusionFrontend:
         ppp =  np.matmul(R0,wTbs[t1-1,0:3,3])
         RRR =  np.matmul(R0,wTbs[t1-1,0:3,0:3])
 
-        dx_vis = np.zeros(3)
         if self.all_gt is not None: # align the initial poses for visualization
             tt_found,dd = self.get_pose_ref(self.video.tstamp[t1-1]-1e-3)
-            dx_vis = dd['T'][0:3,3] - ppp
-            R0 = np.matmul(np.matmul(RRR,dd['T'][0:3,0:3].T).T,R0)
+            self.refTw = np.matmul(dd['T'],np.linalg.inv(wTbs[t1-1]))
 
         g = np.matmul(R0,g0)
         for i in range(0,t1):
-            wTbs[i,0:3,3] = np.matmul(R0,wTbs[i,0:3,3]) + dx_vis
+            wTbs[i,0:3,3] = np.matmul(R0,wTbs[i,0:3,3])
             wTbs[i,0:3,0:3] = np.matmul(R0,wTbs[i,0:3,0:3])
             self.video.state.vs[i] = np.matmul(R0, self.video.state.vs[i])
             self.video.state.wTbs[i] = gtsam.Pose3(wTbs[i])

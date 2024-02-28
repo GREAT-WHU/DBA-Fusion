@@ -388,7 +388,10 @@ class DepthVideo:
                             
                             for i in range(6): H[i,i] += 0.00025  # for stability
 
-                            Hg,vg = BA2GTSAM(H,v,self.Tbc)
+                            # Hg,vg = BA2GTSAM(H,v,self.Tbc)
+                            Hgg = gtsam.BA2GTSAM(H,v,self.Tbc)
+                            Hg = Hgg[0:(marg_t1-marg_t0)*6,0:(marg_t1-marg_t0)*6]
+                            vg = Hgg[0:(marg_t1-marg_t0)*6,  (marg_t1-marg_t0)*6]
                             vis_factor = CustomHessianFactor(marg_result,Hg,vg)
     
                             graph.push_back(vis_factor)
