@@ -28,7 +28,8 @@
 ## Update log
 - [x] Code Upload (2024/02/28)
 - [x] Monocular VIO Examples (2024/02/28)
-- [ ] Multi-Sensor Fusion Examples
+- [x] Multi-sensor data sequence (WUH1012) used in the manuscript can be found [here](https://drive.google.com/file/d/17MpqoQcgZreY7wWwG0iYG09PnK94RFpN/view?usp=drive_link).
+- [ ] Multi-Sensor Fusion Examples 
 - [ ] Stereo/RGB-D VIO Support
 
 ## Installation
