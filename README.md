@@ -28,7 +28,7 @@
 ## Update log
 - [x] Code Upload (2024/02/28)
 - [x] Monocular VIO Examples (2024/02/28)
-- [ ] Multi-Sensor Fusion Examples
+- [ ] Multi-Sensor Fusion Examples (This will be released today (2024/03/20))
 - [ ] Stereo/RGB-D VIO Support
 
 ## Installation
