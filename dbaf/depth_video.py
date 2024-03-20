@@ -38,7 +38,7 @@ def CustomHessianFactor(values: gtsam.Values, H: np.ndarray, v: np.ndarray):
     return l_c
 
 class DepthVideo:
-    def __init__(self, image_size=[480, 640], buffer=1024, save_pkl = False, stereo=False, device="cuda:0"):
+    def __init__(self, image_size=[480, 640], buffer=1024, save_pkl = False, stereo=False, upsample = False, device="cuda:0"):
                 
         # current keyframe count
         self.counter = Value('i', 0)
@@ -74,8 +74,11 @@ class DepthVideo:
         self.poses_save = torch.ones(5000, 7, device="cuda", dtype=torch.float)
         self.tstamp_save = torch.zeros(5000, device="cuda", dtype=torch.float64)
         self.images_save = torch.zeros(5000, ht//8, wd//8, 3, device="cuda", dtype=torch.float)
+        if upsample:
+            self.disps_up_save = torch.zeros(5000, ht, wd, device="cuda", dtype=torch.float).share_memory_()
         self.count_save = 0
         self.save_pkl = save_pkl
+        self.upsample_flag = upsample
 
         self.state = MultiSensorState()
         self.last_t0 = 0
@@ -331,6 +334,8 @@ class DepthVideo:
                         self.tstamp_save[self.count_save] = self.tstamp[i].clone()
                         self.disps_save[self.count_save] = self.disps[i].clone()
                         self.poses_save[self.count_save] = self.poses[i].clone()
+                        if self.upsample_flag:
+                            self.disps_up_save[self.count_save] = self.disps_up[i].clone()
                         self.images_save[self.count_save] = self.images[i,[2,1,0],::8,::8].permute(1,2,0) / 255.0 # might be "3::8, 3::8"?
                         self.count_save += 1
 
@@ -371,6 +376,8 @@ class DepthVideo:
                                         self.tstamp_save[self.count_save] = self.tstamp[i].clone()
                                         self.disps_save[self.count_save] = self.disps[i].clone()
                                         self.poses_save[self.count_save] = self.poses[i].clone()
+                                        if self.upsample_flag:
+                                            self.disps_up_save[self.count_save] = self.disps_up[i].clone()
                                         self.images_save[self.count_save] = self.images[i,[2,1,0],::8,::8].permute(1,2,0) / 255.0 # might be "3::8, 3::8"?
                                         self.count_save += 1
                                 marg_result.insert(X(i), self.cur_result.atPose3(X(i)))

@@ -20,7 +20,7 @@ class DBAFusion:
         self.args = args
 
         # store images, depth, poses, intrinsics (shared between processes)
-        self.video = DepthVideo(args.image_size, args.buffer, save_pkl = args.save_pkl, stereo=args.stereo)
+        self.video = DepthVideo(args.image_size, args.buffer, save_pkl = args.save_pkl, stereo=args.stereo, upsample=args.upsample)
 
         # filter incoming frames so that there is enough motion
         self.filterx = MotionFilter(self.net, self.video, thresh=args.filter_thresh)
@@ -29,6 +29,7 @@ class DBAFusion:
         self.frontend = DBAFusionFrontend(self.net, self.video, self.args)
 
         self.pklpath = args.pklpath
+        self.upsample = args.upsample
 
     def load_weights(self, weights):
         """ load trained model weights """
@@ -80,6 +81,11 @@ class DBAFusion:
 
             count = count.cpu()
             disps = disps.cpu()
+
+            if self.upsample:
+                disps_up=  torch.index_select( self.video.disps_up_save, 0 ,dirty_index)
+                disps_up = disps_up.cpu()
+
             masks = ((count >= 1) & (disps > .5*disps.mean(dim=[1,2], keepdim=True)))
 
             for i in range(len(dirty_index)):
@@ -90,7 +96,10 @@ class DBAFusion:
                 pts = points[i].reshape(-1, 3)[mask].cpu().numpy()
                 clr = images[i].reshape(-1, 3)[mask].cpu().numpy()
                 stamp = stamps[i].cpu()
-                mpoints[ix] = {'pts':pts,'clr':clr}
+                if self.upsample:
+                    mpoints[ix] = {'pts':pts,'clr':clr,'disp':disps[i].cpu().numpy(),'disps_up':disps_up[i].cpu().numpy(),'rgb':images[i].cpu().numpy()}
+                else:
+                    mpoints[ix] = {'pts':pts,'clr':clr,'disp':disps[i].cpu().numpy(),'rgb':images[i].cpu().numpy()}
                 mstamps[ix] = stamp
         ddict = {'points':mpoints,'cameras':mcameras,'stamps':mstamps}
         f_save = open(self.pklpath, 'wb')
@@ -124,7 +133,7 @@ class DBAFusion:
                 pts = points[i].reshape(-1, 3)[mask].cpu().numpy()
                 clr = images[i].reshape(-1, 3)[mask].cpu().numpy()
                 stamp = stamps[i].cpu()
-                mpoints[ix] = {'pts':pts,'clr':clr}
+                mpoints[ix] = {'pts':pts,'clr':clr,'disp':disps[i].cpu().numpy(),'rgb':images[i].cpu().numpy()}
                 mstamps[ix] = stamp
         ddict = {'points':mpoints,'cameras':mcameras,'stamps':mstamps}
         f_save = open(self.pklpath.split('.')[0] + '_raw.pkl', 'wb')

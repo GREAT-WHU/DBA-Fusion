@@ -223,10 +223,9 @@ class CovisibleGraph:
 
         corr = self.corr(coords1) 
 
-        # self.net, delta, weight, damping, upmask = \
-        self.net, delta, weight = \
-            self.update_op(self.net, self.inp, corr, motn, self.ii, self.jj)
-
+        self.net, delta, weight, damping, upmask = \
+            self.update_op(self.net, self.inp, corr, motn, self.ii, self.jj, self.upsample)
+                    
         if t0 is None:
             t0 = max(1, self.ii.min().item()+1)
             
@@ -237,7 +236,8 @@ class CovisibleGraph:
             self.weight = weight.to(dtype=torch.float)
 
             ht, wd = self.coords0.shape[0:2]
-            # self.damping[torch.unique(self.ii)] = damping
+            if self.upsample: 
+                self.damping[torch.unique(self.ii)] = damping
 
             if use_inactive:
                 m = (self.ii_inac >= t0 - self.inac_range) & (self.jj_inac >= t0 - self.inac_range)
@@ -338,14 +338,6 @@ class CovisibleGraph:
         
             if self.upsample:
                 self.video.upsample(torch.unique(self.ii), upmask)
-                # disp_show_front = self.video.disps_up[self.ii[0]].cpu().numpy()
-                # disp_show_front= disp_show_front.astype(np.float32)
-                # normalizer = matplotlib.colors.Normalize(vmin=-0.2, vmax=1.0)
-                # mapper = cm.ScalarMappable(norm=normalizer,cmap='magma')
-                # colormapped_im = (mapper.to_rgba(disp_show_front)[:, :, :3] * 255).astype(np.uint8)
-                # colormapped_im = cv2.cvtColor(colormapped_im,cv2.COLOR_RGB2BGR)
-                # cv2.imshow('disp_show_front',colormapped_im)
-                # cv2.waitKey(1)
 
         self.age += 1
 

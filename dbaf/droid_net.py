@@ -104,7 +104,7 @@ class UpdateModule(nn.Module):
         self.gru = ConvGRU(128, 128+128+64)
         self.agg = GraphAgg()
 
-    def forward(self, net, inp, corr, flow=None, ii=None, jj=None):
+    def forward(self, net, inp, corr, flow=None, ii=None, jj=None, upsample = False):
         """ RaftSLAM update operator """
         batch, num, ch, ht, wd = net.shape
         if flow is None:
@@ -133,10 +133,11 @@ class UpdateModule(nn.Module):
             ### ATTENTION!!!! ###
             # We found this useless for VIO performance, thus disable it to save computation.
             # Feel free to re-enable it.
-
-            # eta, upmask = self.agg(net, ii.to(net.device))
-            # return net, delta, weight, eta, upmask
-            return net, delta, weight
+            if upsample:
+                eta, upmask = self.agg(net, ii.to(net.device))
+                return net, delta, weight, eta, upmask
+            else:
+                return net, delta, weight, None, None
         else:
             return net, delta, weight
 

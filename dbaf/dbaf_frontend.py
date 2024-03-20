@@ -50,6 +50,7 @@ class DBAFusionFrontend:
         self.translation_threshold = 0.0
         self.active_window = args.active_window
         self.high_freq_output = True
+        self.zupt = ('use_zupt' in args and args.use_zupt)
 
         if  not self.visual_only:
             self.max_age = 25
@@ -200,10 +201,10 @@ class DBAFusionFrontend:
         if gnss_found > 0 and self.all_gnss[gnss_found,0] - cur_t < 0.01 :
             self.video.state.append_gnss(cur_t,self.all_gnss[gnss_found,1:4])
 
-        # ## append ZUPT
-        # if self.video.state.preintegrations[self.t1-3].deltaTij() > 3.0:
-        #     if np.linalg.norm(self.video.state.vs[self.t1-2]) < 0.025:
-        #         self.video.state.append_odo(cur_t,np.array([.0,.0,.0]))
+        ## append ZUPT
+        if self.zupt and self.video.state.preintegrations[self.t1-3].deltaTij() > 3.0:
+            if np.linalg.norm(self.video.state.vs[self.t1-2]) < 0.025:
+                self.video.state.append_odo(cur_t,np.array([.0,.0,.0]))
 
         ## append ODO
         if len(self.all_odo) > 0: odo_found = bisect.bisect(self.all_odo[:,0],cur_t - 1e-6)
@@ -513,7 +514,10 @@ class DBAFusionFrontend:
 
     def init_GNSS(self):
         """ initialize the GNSS for geo-referencing fusion """
-        self.video.ten0 = self.video.state.gnss_position[i]
+        ten0 = np.array([self.all_gt[self.all_gt_keys[0]]['X0'],\
+                         self.all_gt[self.all_gt_keys[0]]['Y0'],\
+                         self.all_gt[self.all_gt_keys[0]]['Z0']])
+        self.video.ten0 = ten0
         tn0 = []; tw =[]
         for i in range(len(self.video.state.wTbs) - 10,len(self.video.state.wTbs)):
             if self.video.state.gnss_valid[i]:
@@ -521,6 +525,8 @@ class DBAFusionFrontend:
                 #     ten0 = self.video.sgraph.gnss_position[i]
                 #     is_ref_set = True
                 teg = self.video.state.gnss_position[i]
+                print(self.video.ten0)
+                print(self.video.state.gnss_position[i])
                 tn0g = np.matmul(trans.Cen(self.video.ten0).T,(self.video.state.gnss_position[i] - self.video.ten0))
                 twb = self.video.state.wTbs[i].translation()
                 tn0.append(tn0g)
@@ -542,7 +548,9 @@ class DBAFusionFrontend:
             wTbs = np.matmul(wTcs,self.video.Tbc.inverse().matrix())
             wTbs[:,0:3,3] = np.matmul(Rn0w,(wTbs[:,0:3,3]*s).T).T + tn0w[0]
             wTbs[:,0:3,0:3] = np.matmul(Rn0w, (wTbs[:,0:3,0:3]).T).T
-
+            
+            self.refTw = np.eye(4,4)
+            
             for i in range(0,self.t1):
                 self.video.state.wTbs[i] = gtsam.Pose3(wTbs[i])
                 self.video.state.vs[i] *=  s
@@ -772,6 +780,7 @@ class DBAFusionFrontend:
         if self.all_gt is not None: # align the initial poses for visualization
             tt_found,dd = self.get_pose_ref(self.video.tstamp[t1-1]-1e-3)
             self.refTw = np.matmul(dd['T'],np.linalg.inv(wTbs[t1-1]))
+            self.refTw[0:3,0:3] = trans.att2m([0,0,trans.m2att(self.refTw[0:3,0:3])[2]])
 
         g = np.matmul(R0,g0)
         for i in range(0,t1):

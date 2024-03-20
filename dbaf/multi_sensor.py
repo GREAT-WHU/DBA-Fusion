@@ -116,6 +116,9 @@ class MultiSensorState:
         prev_state = gtsam.gtsam.NavState(self.wTbs[-1],self.vs[-1])
         prev_bias = self.bs[-1]
         prop_state = self.preintegrations[-1].predict(prev_state, prev_bias)
+        if self.preintegrations[-1].deltaTij()>1.0:
+            prop_state = gtsam.gtsam.NavState(self.wTbs[-1],self.vs[-1])
+            
         self.timestamps.append(t)
         self.wTbs.append(prop_state.pose())        
         self.vs.append(prop_state.velocity())
