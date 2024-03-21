@@ -307,9 +307,12 @@ class DepthVideo:
     def set_prior(self, t0, t1):
         for i in range(t0,t0+2):
             self.prior_factor_map[i] = []
+            init_pose_sigma = self.init_pose_sigma
+            if len(self.init_pose_sigma.shape) > 1:
+                init_pose_sigma = self.init_pose_sigma[i-t0]
             self.prior_factor_map[i].append(gtsam.PriorFactorPose3(X(i),\
                                          self.state.wTbs[i], \
-                                         gtsam.noiseModel.Diagonal.Sigmas(self.init_pose_sigma)))
+                                         gtsam.noiseModel.Diagonal.Sigmas(init_pose_sigma)))
             if not self.ignore_imu:
                 self.prior_factor_map[i].append(gtsam.PriorFactorConstantBias(B(i),\
                                              self.state.bs[i], \

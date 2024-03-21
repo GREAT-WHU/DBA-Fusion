@@ -28,6 +28,8 @@ class DBAFusionFrontend:
         self.count = 0
 
         self.warmup = args.warmup
+        self.vi_warmup = 12
+        if 'vi_warmup' in args: self.vi_warmup = args.vi_warmup
         self.beta = args.beta
         self.frontend_nms = args.frontend_nms
         self.keyframe_thresh = args.keyframe_thresh
@@ -355,16 +357,16 @@ class DBAFusionFrontend:
                 self.graph.update(None, None, use_inactive=True)
 
         ## try initializing VI/GNSS
-        if self.t1 > 12 and self.video.vi_init_t1 < 0:
+        if self.t1 > self.vi_warmup and self.video.vi_init_t1 < 0:
             self.init_VI()
-            if self.video.imu_enabled and len(self.all_gnss)>0:
-                self.init_GNSS()
             if not self.visual_only:
                 for i in range(len(self.all_stamp)): # skip to next image
                     if float(self.all_stamp[i][0]) < cur_t + 1e-6: continue
                     else:
                         self.cur_stamp_ii = i
                         break
+        if self.video.imu_enabled and self.video.gnss_init_time <= 0.0 and len(self.all_gnss)>0:
+            self.init_GNSS()
 
         ## set pose for next itration
         self.video.poses[self.t1] = self.video.poses[self.t1-1]
@@ -534,6 +536,11 @@ class DBAFusionFrontend:
         if len(tn0) > 1:
             tn0 = np.array(tn0)
             tw = np.array(tw)
+            bl = np.linalg.norm(tn0[-1] - tn0[0])
+            print('GNSS Alignment Baseline: %.5f' % bl)
+            if bl < 10.0:
+                print('Baseline too short!!')
+                return
             heading_w = math.atan2(tw[-1,1]-tw[0,1],tw[-1,0]-tw[0,0])
             heading_n0 = math.atan2(tn0[-1,1]-tn0[0,1],tn0[-1,0]-tn0[0,0])
             s_w = np.linalg.norm(tw[-1] - tw[0])

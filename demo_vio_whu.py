@@ -50,8 +50,6 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
             if len(calib) > 4:
                 image = cv2.undistort(image, K, calib[4:])
 
-            # image = image[192:704,:,:]
-            image = image[192:576,:,:]
             h0, w0, _ = image.shape
             h1 = int(h0 * np.sqrt((384 * 512) / (h0 * w0)))
             w1 = int(w0 * np.sqrt((384 * 512) / (h0 * w0)))
@@ -60,7 +58,7 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
             image = image[:h1-h1%8, :w1-w1%8]
             image = torch.as_tensor(image).permute(2, 0, 1)
 
-            intrinsics = torch.as_tensor([fx, fy, cx, cy - 192])
+            intrinsics = torch.as_tensor([fx, fy, cx, cy])
             intrinsics[0::2] *= (w1 / w0)
             intrinsics[1::2] *= (h1 / h0)
 
@@ -94,6 +92,7 @@ if __name__ == '__main__':
     parser.add_argument("--beta", type=float, default=0.3, help="weight for translation / rotation components of flow")
     parser.add_argument("--filter_thresh", type=float, default=0.00, help="how much motion before considering new keyframe")
     parser.add_argument("--warmup", type=int, default=8, help="number of warmup frames")
+    parser.add_argument("--vi_warmup", type=int, default=15, help="")
     parser.add_argument("--keyframe_thresh", type=float, default=3.0, help="threshold to create a new keyframe")
     parser.add_argument("--frontend_thresh", type=float, default=16.0, help="add edges between frames whithin this distance")
     parser.add_argument("--frontend_window", type=int, default=25, help="frontend optimization window")
@@ -130,7 +129,6 @@ if __name__ == '__main__':
                      [-1.39621803e-02,  9.99888818e-01, -5.23545345e-03, -2.05000000e-01],
                      [ 0.00000000e+00,  5.23596383e-03,  9.99986292e-01, -5.00000000e-02],
                      [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.00000000e+00]])
-    Ti0i1 = np.eye(4,4)
     Ten0 = None
     is_ref_set  = False
     fp = open(args.gtpath,'rt')
@@ -217,7 +215,8 @@ if __name__ == '__main__':
             if args.use_gnss:
                 dbaf.video.init_pose_sigma = np.array([1.0, 1.0, 10.0,10.0,10.0,10.0])
             else:
-                dbaf.video.init_pose_sigma = np.array([0.1, 0.1, 0.0001, 0.0001,0.0001,0.0001])
+                dbaf.video.init_pose_sigma = np.array([[0.1, 0.1, 0.0001, 0.0001,0.0001,0.0001],
+                                                       [1.0, 1.0, 0.0001, 10.0, 10.0, 10.0]])
             dbaf.video.init_bias_sigma = np.array([1.0,1.0,1.0, 0.1, 0.1, 0.1])
             dbaf.frontend.translation_threshold = args.translation_threshold
             dbaf.frontend.graph.mask_threshold  = args.mask_threshold
