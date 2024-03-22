@@ -8,7 +8,7 @@
 </div>
 
 
-[Paper] [Video] (coming soon...☕)
+[Paper](https://arxiv.org/abs/2403.13714) [Video] (coming soon...☕)
 
 ## What is this? 
 
