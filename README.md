@@ -29,7 +29,7 @@
 - [x] Code Upload (2024/02/28)
 - [x] Monocular VIO Examples (2024/02/28)
 - [x] Multi-sensor data sequence (WUH1012) used in the manuscript is available [here](https://drive.google.com/file/d/1w7UsAwreou_9YRYHz13QIGu6jOJGpdg5/view?usp=sharing).
-- [ ] Multi-Sensor Fusion Examples 
+- [x] Multi-Sensor Fusion Examples 
 - [ ] Stereo/RGB-D VIO Support
 
 ## Installation
@@ -144,6 +144,16 @@ To run monocular VIO on your own dataset,
 * Specify the camera intrinsics and camera-IMU extrinsics in the script. 
 * Try it!
 
+## Some Results
+- Visual point cloud map compared to accumulated LiDAR point clouds.
+<div align=center>
+<img alt="" src="./assets/lidar.jpg" width='500px' />
+</div>
+
+- Further processing on the visual point clouds. (P.S. For 3-D GS, the point positions and number are fixed. The training time is around 3 minutes on RTX4080 laptop. )
+<div align=center>
+<img alt="" src="./assets/postprocessing.png" width='750px' />
+</div>
 
 ## Acknowledgement
 DBA-Fusion is developed by [GREAT](http://igmas.users.sgg.whu.edu.cn/group) (GNSS+ REsearch, Application and Teaching) Group, School of Geodesy and Geomatics, Wuhan University. 
