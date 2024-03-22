@@ -8,7 +8,7 @@
 </div>
 
 
-[Paper](https://arxiv.org/abs/2403.13714) [Video] (coming soon...☕)
+[[Paper](https://arxiv.org/abs/2403.13714)] [Video] (coming soon...☕)
 
 ## What is this? 
 
@@ -41,7 +41,7 @@ Use the following commands to set up the python environment.
 conda create -n dbaf python=3.10.11
 conda activate dbaf
 pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
-pip install torch-scatter=2.0.9 -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
+pip install torch-scatter==2.0.9 -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
 pip install gdown tqdm numpy==1.25.0 numpy-quaternion==2022.4.3 opencv-python==4.7.0.72 scipy pyparsing matplotlib h5py 
 pip install evo --upgrade --no-binary evo
 pip install open3d # optional for visualization
