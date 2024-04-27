@@ -140,7 +140,7 @@ python visualization/check_reconstruction_kitti360.py
 ### 3. WUH1012
 Download our self-collected data sequence from [here](https://drive.google.com/file/d/1w7UsAwreou_9YRYHz13QIGu6jOJGpdg5/view?usp=sharing).
 
-See [batch_whu.py](../batch_whu.py).for multi-sensor fusion in different modes.
+See [batch_whu.py](../batch_whu.py) for multi-sensor fusion in different modes.
 
 ### 4. Run on Your Own Dataset
 To run monocular VIO on your own dataset,
