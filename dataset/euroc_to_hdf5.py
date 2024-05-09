@@ -32,15 +32,17 @@ def image_stream(imagedir, imagestamp, h5path, calib, stride):
     Kn[1,2] = cy
 
     image_list = sorted(os.listdir(imagedir))[::stride]
-    image_stamps = np.loadtxt(imagestamp,str)
+    image_stamps = np.loadtxt(imagestamp,str,delimiter=',')
     image_dict = dict(zip(image_stamps[:,1],image_stamps[:,0]))
     h5_f = h5py.File(h5path,'w')
     for t, imfile in enumerate(image_list):
         image = cv2.imread(os.path.join(imagedir, imfile))
 
         if len(calib) > 4:
-            image = cv2.undistort(image, K, calib[4:])
-        tt = float(image_dict[imfile])
+            m1, m2 = cv2.initUndistortRectifyMap(K,calib[4:],np.eye(3),Kn,(image.shape[1],image.shape[0]),cv2.CV_32FC1)
+            image = cv2.remap(image, m1, m2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+
+        tt = float(image_dict[imfile]) /1e9
 
         h0, w0, _ = image.shape
         h1 = int(h0 * np.sqrt((384 * 512) / (h0 * w0)))
@@ -50,7 +52,7 @@ def image_stream(imagedir, imagestamp, h5path, calib, stride):
         image = image[:h1-h1%8, :w1-w1%8]
         image = torch.as_tensor(image).permute(2, 0, 1)
 
-        intrinsics = torch.as_tensor([fx, fy, cx, cy])
+        intrinsics = torch.as_tensor([fx, fy, cx, cy ])
         intrinsics[0::2] *= (w1 / w0)
         intrinsics[1::2] *= (h1 / h0)
 
@@ -70,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument("--imagestamp", type=str, help="")
     parser.add_argument("--h5path", type=str, help="")
     parser.add_argument("--calib", type=str, help="path to calibration file")
-    parser.add_argument("--stride", default=2, type=int, help="frame stride")
+    parser.add_argument("--stride", default=4, type=int, help="frame stride")
     parser.add_argument("--show_plot", action="store_true", help="")
 
     args = parser.parse_args()

@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument("--imagestamp", type=str, help="")
     parser.add_argument("--h5path", type=str, help="")
     parser.add_argument("--calib", type=str, help="path to calibration file")
-    parser.add_argument("--stride", default=3, type=int, help="frame stride")
+    parser.add_argument("--stride", default=4, type=int, help="frame stride")
     parser.add_argument("--show_plot", action="store_true", help="")
 
     args = parser.parse_args()
