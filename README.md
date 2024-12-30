@@ -50,7 +50,7 @@ pip install open3d # optional for visualization
 As for GTSAM, we make some modifications to it to extend the python wrapper APIs, clone it from the following repository and install it under your python environment.
 
 ```Bash
-git clone https://github.com/ZhouTangtang/gtsam.git
+git clone https://github.com/yuxuanzhou97/gtsam
 cd gtsam
 mkdir build
 cd build
