@@ -8,7 +8,7 @@
 </div>
 
 
-[[Paper](https://arxiv.org/abs/2403.13714)] [Video] (coming soon...☕)
+[[Paper](https://arxiv.org/abs/2403.13714)] [[Video](https://www.bilibili.com/video/BV1yeNEecEwR/?share_source=copy_web&vd_source=a659a573a520a1151e294d0c8b9c842a)]
 
 ## What is this? 
 
