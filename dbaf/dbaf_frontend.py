@@ -448,7 +448,7 @@ class DBAFusionFrontend:
             var_g += np.linalg.norm(tmp_g - aver_g)**2
         var_g =math.sqrt(var_g/ccount)
         if var_g < 0.25:
-            print("IMU excitation not enough!")
+            print("IMU excitation not enough!",var_g)
         else:
             poses = SE3(self.video.poses)
             self.plt_pos = [[],[]]
